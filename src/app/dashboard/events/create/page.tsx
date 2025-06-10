@@ -10,6 +10,7 @@ export default function CreateEventPage() {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
+    slug: '',
     type: 'Seminar',
     location: '',
     description: '',
@@ -17,6 +18,15 @@ export default function CreateEventPage() {
     endTime: '',
     quota: '',
   })
+
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9 -]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim()
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -47,10 +57,19 @@ export default function CreateEventPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [name]: value
+      }
+      
+      // Auto-generate slug when name changes
+      if (name === 'name') {
+        newData.slug = generateSlug(value)
+      }
+      
+      return newData
+    })
   }
 
   return (
@@ -99,9 +118,27 @@ export default function CreateEventPage() {
                 value={formData.name}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white text-gray-900 placeholder-gray-500"
                 placeholder="Enter event name"
               />
+            </div>
+
+            {/* Event Slug */}
+            <div>
+              <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-2">
+                Event Slug *
+              </label>
+              <input
+                type="text"
+                id="slug"
+                name="slug"
+                value={formData.slug}
+                onChange={handleInputChange}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white text-gray-900 placeholder-gray-500"
+                placeholder="event-slug-url"
+              />
+              <p className="text-sm text-gray-500 mt-1">URL-friendly version of the event name (auto-generated)</p>
             </div>
 
             {/* Event Type and Location */}
@@ -116,7 +153,7 @@ export default function CreateEventPage() {
                   value={formData.type}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white text-gray-900"
                 >
                   <option value="Seminar">Seminar</option>
                   <option value="Workshop">Workshop</option>
@@ -134,7 +171,7 @@ export default function CreateEventPage() {
                   value={formData.location}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white text-gray-900 placeholder-gray-500"
                   placeholder="Enter event location"
                 />
               </div>
@@ -151,7 +188,7 @@ export default function CreateEventPage() {
                 value={formData.description}
                 onChange={handleInputChange}
                 rows={4}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white text-gray-900 placeholder-gray-500"
                 placeholder="Enter event description"
               ></textarea>
             </div>
@@ -169,7 +206,7 @@ export default function CreateEventPage() {
                   value={formData.startTime}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white text-gray-900"
                 />
               </div>
 
@@ -184,7 +221,7 @@ export default function CreateEventPage() {
                   value={formData.endTime}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white text-gray-900"
                 />
               </div>
             </div>
@@ -202,7 +239,7 @@ export default function CreateEventPage() {
                 onChange={handleInputChange}
                 required
                 min="1"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white text-gray-900 placeholder-gray-500"
                 placeholder="Enter number of tickets"
               />
             </div>
