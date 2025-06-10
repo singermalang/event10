@@ -3,11 +3,16 @@ import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import QRCode from 'qrcode'
-import db from '@/lib/db'
-import { generateSlug } from '@/lib/utils'
+import db, { testConnection } from '@/lib/db'
 
 export async function POST(request: NextRequest) {
   try {
+    // Test database connection first
+    const isConnected = await testConnection()
+    if (!isConnected) {
+      return NextResponse.json({ message: 'Database connection failed' }, { status: 500 })
+    }
+
     const formData = await request.formData()
     
     const name = formData.get('name') as string
@@ -91,12 +96,21 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Error creating event:', error)
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ 
+      message: 'Internal server error', 
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
 
 export async function GET() {
   try {
+    // Test database connection first
+    const isConnected = await testConnection()
+    if (!isConnected) {
+      return NextResponse.json({ message: 'Database connection failed' }, { status: 500 })
+    }
+
     const [rows] = await db.execute(`
       SELECT e.*, 
              COUNT(t.id) as total_tickets,
@@ -110,7 +124,10 @@ export async function GET() {
     return NextResponse.json(rows)
   } catch (error) {
     console.error('Error fetching events:', error)
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ 
+      message: 'Internal server error',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
 

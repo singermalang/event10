@@ -1,9 +1,20 @@
 import Link from 'next/link'
 import { Calendar, Users, Award, BarChart3, Plus, Eye, Ticket } from 'lucide-react'
-import db from '@/lib/db'
+import db, { testConnection } from '@/lib/db'
 
 async function getDashboardStats() {
   try {
+    // Test database connection first
+    const isConnected = await testConnection()
+    if (!isConnected) {
+      return {
+        totalEvents: 0,
+        totalParticipants: 0,  
+        totalTickets: 0,
+        verifiedTickets: 0,
+      }
+    }
+
     const [eventsResult] = await db.execute('SELECT COUNT(*) as count FROM events')
     const [participantsResult] = await db.execute('SELECT COUNT(*) as count FROM participants')
     const [ticketsResult] = await db.execute('SELECT COUNT(*) as count FROM tickets')
@@ -28,6 +39,12 @@ async function getDashboardStats() {
 
 async function getRecentEvents() {
   try {
+    // Test database connection first
+    const isConnected = await testConnection()
+    if (!isConnected) {
+      return []
+    }
+
     const [rows] = await db.execute(`
       SELECT e.*, 
              COUNT(t.id) as total_tickets,

@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import db from '@/lib/db'
+import db, { testConnection } from '@/lib/db'
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    // Test database connection first
+    const isConnected = await testConnection()
+    if (!isConnected) {
+      return NextResponse.json({ message: 'Database connection failed' }, { status: 500 })
+    }
+
     const eventId = params.id
 
     // Get event details with statistics
@@ -39,7 +45,10 @@ export async function GET(
     })
   } catch (error) {
     console.error('Error fetching event details:', error)
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ 
+      message: 'Internal server error',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
 
