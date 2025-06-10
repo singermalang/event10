@@ -59,6 +59,12 @@ export async function POST(request: NextRequest) {
       ticketDesignPath = `/uploads/${filename}`
       ticketDesignSize = ticketDesignFile.size
       ticketDesignType = ticketDesignFile.type
+
+      // Track file upload in database
+      await db.execute(
+        'INSERT INTO file_uploads (filename, original_name, file_path, file_size, file_type, upload_type, related_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [filename, ticketDesignFile.name, ticketDesignPath, ticketDesignSize, ticketDesignType, 'ticket_design', null]
+      )
     }
 
     // Insert event into database
@@ -68,6 +74,14 @@ export async function POST(request: NextRequest) {
     )
 
     const eventId = (result as any).insertId
+
+    // Update file upload with event ID
+    if (ticketDesignPath) {
+      await db.execute(
+        'UPDATE file_uploads SET related_id = ? WHERE file_path = ? AND upload_type = ?',
+        [eventId, ticketDesignPath, 'ticket_design']
+      )
+    }
 
     // Generate tickets
     const ticketsDir = path.join(process.cwd(), 'public', 'tickets')
